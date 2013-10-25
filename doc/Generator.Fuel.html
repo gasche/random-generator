@@ -16,27 +16,7 @@
 <center><h1>Module <a href="type_Generator.Fuel.html">Generator.Fuel</a></h1></center>
 <br>
 <pre><span class="keyword">module</span> Fuel: <code class="code">sig</code> <a href="Generator.Fuel.html">..</a> <code class="code">end</code></pre>The <code class="code">Fuel</code> submodule provides the basic operations on fueled
-    generators.
-<p>
-
-    The library provides you with the basic constructions to build
-    fueled generators; in particular, you have to apply the <code class="code">tick</code>
-    function yourself at places that you think should consume one unit
-    of fuel, and can provide your own splitting function to say how to
-    divide fuel between subbranches (if you have a simple situation
-    with only two branches, you can use <a href="Generator.html#VALsplit_int"><code class="code">Generator.split_int</code></a>).
-<p>
-
-    We also provide some convenience functions outside
-    this module, <a href="Generator.html#VALnullary"><code class="code">Generator.nullary</code></a>, <a href="Generator.html#VALunary"><code class="code">Generator.unary</code></a> and <a href="Generator.html#VALbinary"><code class="code">Generator.binary</code></a>, that have
-    a pre-build tick+split logic that will suit most practical use
-    cases for generating inductive types with constructors having
-    zero, one or two recursive occurences.
-<p>
-
-    Remark: I have no idea what the distribution of terms generated
-    used this technique is, and whether it is "uniform" -- probably
-    not. I only found it very useful in practice.<br>
+    generators.<br>
 <hr width="100%">
 <pre><span id="VALmap"><span class="keyword">val</span> map</span> : <code class="type">('a -> 'b) -> 'a <a href="Generator.html#TYPEfueled">Generator.fueled</a> -> 'b <a href="Generator.html#TYPEfueled">Generator.fueled</a></code></pre><pre><span id="VALmap'"><span class="keyword">val</span> map'</span> : <code class="type">'a <a href="Generator.html#TYPEfueled">Generator.fueled</a> -> ('a -> 'b) -> 'b <a href="Generator.html#TYPEfueled">Generator.fueled</a></code></pre><pre><span id="VALzero"><span class="keyword">val</span> zero</span> : <code class="type">'a -> 'a <a href="Generator.html#TYPEfueled">Generator.fueled</a></code></pre><pre><span id="VALtick"><span class="keyword">val</span> tick</span> : <code class="type">'a <a href="Generator.html#TYPEfueled">Generator.fueled</a> -> 'a <a href="Generator.html#TYPEfueled">Generator.fueled</a></code></pre><pre><span id="VALprod"><span class="keyword">val</span> prod</span> : <code class="type">(int -> (int * int) <a href="Generator.html#TYPEgen">Generator.gen</a>) -><br>       'a <a href="Generator.html#TYPEfueled">Generator.fueled</a> -> 'b <a href="Generator.html#TYPEfueled">Generator.fueled</a> -> ('a * 'b) <a href="Generator.html#TYPEfueled">Generator.fueled</a></code></pre><pre><span id="VALchoose"><span class="keyword">val</span> choose</span> : <code class="type">'a <a href="Generator.html#TYPEfueled">Generator.fueled</a> list -> 'a <a href="Generator.html#TYPEfueled">Generator.fueled</a></code></pre><div class="info">
 For a given amount of fuel, we will only choose among the

@@ -219,7 +219,27 @@ The <code class="code">Fuel</code> submodule provides the basic operations on fu
     generators.
 </div>
 <br>
-Here is a fueled generator for <code class="code">unit tree</code>:
+The library provides you with the basic constructions to build
+    fueled generators; in particular, you have to apply the <code class="code">tick</code>
+    function yourself at places that you think should consume one unit
+    of fuel, and can provide your own splitting function to say how to
+    divide fuel between subbranches (if you have a simple situation
+    with only two branches, you can use <a href="Generator.html#VALsplit_int"><code class="code">Generator.split_int</code></a>).
+<p>
+
+    We also provide some convenience functions outside
+    this module, <a href="Generator.html#VALnullary"><code class="code">Generator.nullary</code></a>, <a href="Generator.html#VALunary"><code class="code">Generator.unary</code></a> and <a href="Generator.html#VALbinary"><code class="code">Generator.binary</code></a>, that have
+    a pre-build tick+split logic that will suit most practical use
+    cases for generating inductive types with constructors having
+    zero, one or two recursive occurences.
+<p>
+
+    Remark: I have no idea what the distribution of terms generated
+    used this technique is, and whether it is "uniform" -- probably
+    not. I only found it very useful in practice.
+<p>
+
+    Here is a fueled generator for <code class="code">unit tree</code>:
 <pre><code class="code">    let tree : unit tree fueled =
       Fuel.fix (fun tree () -&gt;
         Fuel.choose [
