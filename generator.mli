@@ -263,7 +263,9 @@ end
 (**
     The [Fuel] submodule provides the basic operations on fueled
     generators.
-    
+*)
+
+(**    
     The library provides you with the basic constructions to build
     fueled generators; in particular, you have to apply the [tick]
     function yourself at places that you think should consume one unit
@@ -280,9 +282,7 @@ end
     Remark: I have no idea what the distribution of terms generated
     used this technique is, and whether it is "uniform" -- probably
     not. I only found it very useful in practice.
-*)
 
-(**
     Here is a fueled generator for [unit tree]:
 {[
     let tree : unit tree fueled =
