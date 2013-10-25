@@ -1,0 +1,133 @@
+<html>
+<head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=iso-8859-1" http-equiv="Content-Type">
+<link rel="Start" href="index.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Generator" rel="Chapter" href="Generator.html"><title>Index of values</title>
+</head>
+<body>
+<center><h1>Index of values</h1></center>
+<table>
+<tr><td align="left"><br>A</td></tr>
+<tr><td><a href="Generator.html#VALapp">app</a> [<a href="Generator.html">Generator</a>]</td>
+<td></td></tr>
+<tr><td><a href="Generator.html#VALapp'">app'</a> [<a href="Generator.html">Generator</a>]</td>
+<td></td></tr>
+<tr><td align="left"><br>B</td></tr>
+<tr><td><a href="Generator.html#VALbacktrack">backtrack</a> [<a href="Generator.html">Generator</a>]</td>
+<td><div class="info">
+<code class="code">backtrack gen</code> will loop until the generator returns a successful
+    value <code class="code">Some v</code>.
+</div>
+</td></tr>
+<tr><td><a href="Generator.html#VALbinary">binary</a> [<a href="Generator.html">Generator</a>]</td>
+<td><div class="info">
+will do a tick and use split_int
+</div>
+</td></tr>
+<tr><td><a href="Generator.html#VALbind">bind</a> [<a href="Generator.html">Generator</a>]</td>
+<td></td></tr>
+<tr><td><a href="Generator.html#VALbind'">bind'</a> [<a href="Generator.html">Generator</a>]</td>
+<td></td></tr>
+<tr><td><a href="Generator.html#VALbool">bool</a> [<a href="Generator.html">Generator</a>]</td>
+<td></td></tr>
+<tr><td align="left"><br>C</td></tr>
+<tr><td><a href="Generator.Fuel.html#VALchoose">choose</a> [<a href="Generator.Fuel.html">Generator.Fuel</a>]</td>
+<td><div class="info">
+For a given amount of fuel, we will only choose among the
+      generators that can produce a term.
+</div>
+</td></tr>
+<tr><td><a href="Generator.html#VALchoose">choose</a> [<a href="Generator.html">Generator</a>]</td>
+<td></td></tr>
+<tr><td><a href="Generator.html#VALcond">cond</a> [<a href="Generator.html">Generator</a>]</td>
+<td><div class="info">
+<code class="code">cond b gen</code> should be preferred to <code class="code">guard (fun _ -&gt; b) gen</code> for
+    performance reasons, as the generator is not requested any output
+    in the <code class="code">false</code> case.
+</div>
+</td></tr>
+<tr><td align="left"><br>F</td></tr>
+<tr><td><a href="Generator.Fuel.html#VALfix">fix</a> [<a href="Generator.Fuel.html">Generator.Fuel</a>]</td>
+<td></td></tr>
+<tr><td><a href="Generator.html#VALfix">fix</a> [<a href="Generator.html">Generator</a>]</td>
+<td></td></tr>
+<tr><td align="left"><br>G</td></tr>
+<tr><td><a href="Generator.html#VALguard">guard</a> [<a href="Generator.html">Generator</a>]</td>
+<td></td></tr>
+<tr><td align="left"><br>J</td></tr>
+<tr><td><a href="Generator.html#VALjoin">join</a> [<a href="Generator.html">Generator</a>]</td>
+<td></td></tr>
+<tr><td align="left"><br>L</td></tr>
+<tr><td><a href="Generator.html#VALlowercase">lowercase</a> [<a href="Generator.html">Generator</a>]</td>
+<td></td></tr>
+<tr><td align="left"><br>M</td></tr>
+<tr><td><a href="Generator.html#VALmake_char">make_char</a> [<a href="Generator.html">Generator</a>]</td>
+<td></td></tr>
+<tr><td><a href="Generator.html#VALmake_int">make_int</a> [<a href="Generator.html">Generator</a>]</td>
+<td></td></tr>
+<tr><td><a href="Generator.Fuel.html#VALmap">map</a> [<a href="Generator.Fuel.html">Generator.Fuel</a>]</td>
+<td></td></tr>
+<tr><td><a href="Generator.html#VALmap">map</a> [<a href="Generator.html">Generator</a>]</td>
+<td></td></tr>
+<tr><td><a href="Generator.Fuel.html#VALmap'">map'</a> [<a href="Generator.Fuel.html">Generator.Fuel</a>]</td>
+<td></td></tr>
+<tr><td><a href="Generator.html#VALmap'">map'</a> [<a href="Generator.html">Generator</a>]</td>
+<td></td></tr>
+<tr><td align="left"><br>N</td></tr>
+<tr><td><a href="Generator.html#VALnullary">nullary</a> [<a href="Generator.html">Generator</a>]</td>
+<td><div class="info">
+zero
+</div>
+</td></tr>
+<tr><td align="left"><br>P</td></tr>
+<tr><td><a href="Generator.Fuel.html#VALprod">prod</a> [<a href="Generator.Fuel.html">Generator.Fuel</a>]</td>
+<td></td></tr>
+<tr><td><a href="Generator.html#VALpure">pure</a> [<a href="Generator.html">Generator</a>]</td>
+<td></td></tr>
+<tr><td align="left"><br>R</td></tr>
+<tr><td><a href="Generator.html#VALreturn">return</a> [<a href="Generator.html">Generator</a>]</td>
+<td><div class="info">
+synonym of <code class="code">pure</code>
+</div>
+</td></tr>
+<tr><td><a href="Generator.html#VALrun">run</a> [<a href="Generator.html">Generator</a>]</td>
+<td></td></tr>
+<tr><td align="left"><br>S</td></tr>
+<tr><td><a href="Generator.html#VALselect">select</a> [<a href="Generator.html">Generator</a>]</td>
+<td></td></tr>
+<tr><td><a href="Generator.html#VALsplit_int">split_int</a> [<a href="Generator.html">Generator</a>]</td>
+<td><div class="info">
+<code class="code">split_int n</code> returns two integers <code class="code">(i,k)</code> each in the interval
+    <code class="code">[0;n]</code> such that <code class="code">i + k = n</code>
+</div>
+</td></tr>
+<tr><td><a href="Generator.html#VALstring">string</a> [<a href="Generator.html">Generator</a>]</td>
+<td></td></tr>
+<tr><td><a href="Generator.html#VALsucceed">succeed</a> [<a href="Generator.html">Generator</a>]</td>
+<td></td></tr>
+<tr><td align="left"><br>T</td></tr>
+<tr><td><a href="Generator.Fuel.html#VALtick">tick</a> [<a href="Generator.Fuel.html">Generator.Fuel</a>]</td>
+<td></td></tr>
+<tr><td align="left"><br>U</td></tr>
+<tr><td><a href="Generator.html#VALunary">unary</a> [<a href="Generator.html">Generator</a>]</td>
+<td><div class="info">
+will do a tick
+</div>
+</td></tr>
+<tr><td><a href="Generator.html#VALunit">unit</a> [<a href="Generator.html">Generator</a>]</td>
+<td><div class="info">
+base combinators names are adapted from Kaputt.Generator
+</div>
+</td></tr>
+<tr><td><a href="Generator.html#VALuppercase">uppercase</a> [<a href="Generator.html">Generator</a>]</td>
+<td></td></tr>
+<tr><td align="left"><br>Z</td></tr>
+<tr><td><a href="Generator.Fuel.html#VALzero">zero</a> [<a href="Generator.Fuel.html">Generator.Fuel</a>]</td>
+<td></td></tr>
+</table><br>
+</body>
+</html>
