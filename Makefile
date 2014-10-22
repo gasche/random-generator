@@ -1,4 +1,4 @@
-TARGETS= generator.cma generator.cmxa generator.cmxs
+TARGETS= random_generator.cma random_generator.cmxa random_generator.cmxs
 
 all:
 	ocamlbuild $(TARGETS)
@@ -7,14 +7,14 @@ clean:
 	ocamlbuild -clean
 
 doc:
-	ocamlbuild generator.docdir/index.html
+	ocamlbuild random_generator.docdir/index.html
 
-TO_INSTALL=META $(addprefix _build/, $(TARGETS) generator.a generator.cmi)
+TO_INSTALL=META $(addprefix _build/, $(TARGETS) random_generator.a random_generator.cmi)
 
 install:
-	ocamlfind install generator $(TO_INSTALL)
+	ocamlfind install random-generator $(TO_INSTALL)
 
 uninstall:
-	ocamlfind remove generator
+	ocamlfind remove random-generator
 
 .PHONY: all clean doc install uninstall

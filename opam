@@ -4,7 +4,7 @@ build: [
     [make "all" "install"]
 ]
 remove: [
-    ["ocamlfind" "remove" "generator"]
+    ["ocamlfind" "remove" "random-generator"]
 ]
 depends: ["ocamlfind"]
 tags: [ "random" "generator" "fuel" ]
