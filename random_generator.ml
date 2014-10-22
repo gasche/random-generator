@@ -8,14 +8,14 @@
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * - Redistributions of source code must retain the above copyright notice, this
  * list of conditions and the following disclaimer.
  * - Redistributions in binary form must reproduce the above copyright
  * notice, this list of conditions and the following disclaimer in the
  * documentation and/or other materials provided with the
  * distribution.
- * 
+ *
  * This software is provided by the copyright holders and contributors "as is" and
  * any express or implied warranties, including, but not limited to, the implied
  * warranties of merchantability and fitness for a particular purpose are
@@ -52,7 +52,7 @@ let rec fix derec_gen param =
   fun rand -> derec_gen (fix derec_gen) param rand
 
 let prod g1 g2 =
-  fun rand -> 
+  fun rand ->
     let v1 = g1 rand in
     let v2 = g2 rand in
     (v1, v2)
@@ -75,8 +75,7 @@ let digit = make_char '0' 10
 
 let string int char r =
   let len = int r in
-  let res = String.create len in
-  for i = 0 to len - 1 do res.[i] <- char r done;
+  let res = String.init len (fun _ -> char r) in
   res
 
 type 'a nonempty_list = 'a list

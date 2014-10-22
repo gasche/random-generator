@@ -34,3 +34,8 @@ generators to steal and reuse it -- or at least feel inspired by it.
 
 I consider that I can (and will) break backward compatibility by
 changing the interface for any 0.x release.
+
+## License
+
+This library is free software, available under
+the BSD-2-clause license (see file `LICENSE`).

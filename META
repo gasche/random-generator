@@ -1,0 +1,7 @@
+version = "0.1"
+description = "Random Generator Combinators"
+archive(byte) = "random_generator.cma"
+archive(byte, plugin) = "random_generator.cma"
+archive(native) = "random_generator.cmxa"
+archive(native, plugin) = "random_generator.cmxs"
+exists_if = "random_generator.cma"
