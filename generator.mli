@@ -8,14 +8,14 @@
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * - Redistributions of source code must retain the above copyright notice, this
  * list of conditions and the following disclaimer.
  * - Redistributions in binary form must reproduce the above copyright
  * notice, this list of conditions and the following disclaimer in the
  * documentation and/or other materials provided with the
  * distribution.
- * 
+ *
  * This software is provided by the copyright holders and contributors "as is" and
  * any express or implied warranties, including, but not limited to, the implied
  * warranties of merchantability and fitness for a particular purpose are
@@ -265,14 +265,14 @@ end
     generators.
 *)
 
-(**    
+(**
     The library provides you with the basic constructions to build
     fueled generators; in particular, you have to apply the [tick]
     function yourself at places that you think should consume one unit
     of fuel, and can provide your own splitting function to say how to
     divide fuel between subbranches (if you have a simple situation
     with only two branches, you can use {!split_int}).
-    
+
     We also provide some convenience functions outside
     this module, {!nullary}, {!unary} and {!binary}, that have
     a pre-build tick+split logic that will suit most practical use
