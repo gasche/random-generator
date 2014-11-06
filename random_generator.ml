@@ -78,6 +78,16 @@ let string int char r =
   let res = String.init len (fun _ -> char r) in
   res
 
+let shuffle li r =
+  let array = Array.of_list li in
+  for i = Array.length array-1 downto 1 do
+    let j = Random.State.int r (i+1) in
+    let tmp = array.(i) in
+    array.(i) <- array.(j);
+    array.(j) <- tmp;
+  done;
+  Array.to_list array
+
 type 'a nonempty_list = 'a list
 
 let select li r =
@@ -135,14 +145,16 @@ module Fuel = struct
       | None, _ | _, None -> None
       | Some v1, Some v2 -> Some (v1, v2)
 
-  let choose li = fun random fuel ->
-    let project gen =
-      match gen random fuel with
-        | None -> []
-        | Some v -> [v] in
-    match List.flatten (List.map project li) with
+  let choose li random fuel =
+    let li = shuffle li random in
+    let rec first = function
       | [] -> None
-      | _::_ as li -> Some (select li random)
+      | x::xs ->
+         begin match x random fuel with
+                 | None -> first xs
+                 | Some _ as result -> result
+         end
+    in first li
 
   let rec fix derec_gen param =
     fun random fuel -> derec_gen (fix derec_gen) param random fuel

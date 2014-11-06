@@ -72,6 +72,8 @@ type 'a nonempty_list = 'a list
 val select : 'a nonempty_list -> 'a gen
 val choose : 'a gen nonempty_list -> 'a gen
 
+val shuffle : 'a list -> 'a list gen
+(** returns a (uniform) permutation of the list *)
 
 (** {2 ['a gen] is a functor} *)
 
