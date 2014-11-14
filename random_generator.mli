@@ -36,8 +36,8 @@ type random_state = Random.State.t
 
     Use [Random.get_state ()] to get the current (global) state of the
     Random module, or [Random.State.make : int array -> Random.State.tt]
-    or [Random.State.self_init () : unit -> Random.State.t] to generate fresh,
-    independent state.
+    or [Random.State.make_self_init () : unit -> Random.State.t] to generate
+    fresh, independent state.
 *)
 
 type 'a gen = random_state -> 'a
