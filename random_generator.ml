@@ -61,6 +61,7 @@ let prod g1 g2 =
 let unit r = ()
 let bool r = Random.State.bool r
 let make_int a b r = a + Random.State.int r (b - a)
+let make_float a b r = a +. Random.State.float r (b -. a)
 
 let split_int n r =
   let k = Random.State.int r (n + 1) in

@@ -53,6 +53,7 @@ val uppercase : char gen
 (** base combinators names are adapted from Kaputt.Generator *)
 val unit : unit gen
 val make_int : int -> int -> int gen
+val make_float : float -> float -> float gen
 val string : int gen -> char gen -> string gen
 val bool : bool gen
 
