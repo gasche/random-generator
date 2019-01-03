@@ -1,20 +1,22 @@
-TARGETS= random_generator.cma random_generator.cmxa random_generator.cmxs
+all: build
 
-all:
-	ocamlbuild $(TARGETS)
+.PHONY: build
+build:
+	dune build
 
+.PHONY: clean
 clean:
-	ocamlbuild -clean
+	dune clean
 
+.PHONY: docs
 doc:
-	ocamlbuild random_generator.docdir/index.html
+	ocamlbuild src/random_generator.docdir/index.html
 
-TO_INSTALL=META $(addprefix _build/, $(TARGETS) random_generator.a random_generator.cmi)
-
+.PHONY: install
 install:
-	ocamlfind install random-generator $(TO_INSTALL)
+	dune build @install
+	dune install
 
+.PHONY: uninstall
 uninstall:
-	ocamlfind remove random-generator
-
-.PHONY: all clean doc install uninstall
+	dune uninstall

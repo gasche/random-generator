@@ -1,2 +1,4 @@
 _build
 *.docdir
+.merlin
+*.install

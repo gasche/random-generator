@@ -1,5 +1,5 @@
 echo build-doc
-ocamlbuild random_generator.docdir/index.html
+ocamlbuild src/random_generator.docdir/index.html
 
 echo get-hash
 HASH=`git rev-parse HEAD`
@@ -11,7 +11,7 @@ echo rm -fR doc
 rm -fR doc
 
 echo mv
-mv _build/random_generator.docdir doc
+mv _build/src/random_generator.docdir doc
 
 # We renamed Generator into Random_generator, add a redirect page
 cat <<EOF > doc/Generator.html
