@@ -1,5 +1,5 @@
 echo build-doc
-ocamlbuild generator.docdir/index.html
+ocamlbuild random_generator.docdir/index.html
 
 echo get-hash
 HASH=`git rev-parse HEAD`
@@ -11,7 +11,7 @@ echo rm -fR doc
 rm -fR doc
 
 echo mv
-mv _build/generator.docdir doc
+mv _build/random_generator.docdir doc
 
 git commit -a -m "regenerate documentation at commit $HASH"
 

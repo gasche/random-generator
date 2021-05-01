@@ -5,11 +5,11 @@ type term =
 and var = string
 
 (** x, y or z *)
-let random_var = Generator.(string (return 1) (make_char 'x' 3))
+let random_var = Random_generator.(string (return 1) (make_char 'x' 3))
 
 (** a first random term generator; no well-scoping property, though *)
 let random_term =
-  let open Generator in
+  let open Random_generator in
   let ($$) = app in
   Fuel.fix (fun random_term () ->
     Fuel.choose [
@@ -23,7 +23,7 @@ let random_term =
 
 (** random generator for well-scoped terms only *)
 let random_scoped_term =
-  let open Generator in
+  let open Random_generator in
   let ($$) = app in
   Fuel.fix (fun random_term env ->
     Fuel.choose [

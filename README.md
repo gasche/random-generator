@@ -23,7 +23,7 @@ The library currently provides three different pieces:
   "generate a value such that this (possibly empty) condition is verified"
 - a type `'a fueled` for generation of values with an inductive
   (tree-like) structure that looks nice to the human eye; see [the
-  documentation](http://gasche.github.io/random-generator/doc/Generator.html#2_fueledgenerators) for more information on this.
+  documentation](http://gasche.github.io/random-generator/doc/Random_generator.html#2_fueledgenerators) for more information on this.
 
 I consider the value of this library to be in its interface, not
 necessarily its implementation. I think the current interface is solid

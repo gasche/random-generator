@@ -1,9 +1,9 @@
 (*
- * Generator -- a combinator library to generate random values
+ * Random_generator -- a combinator library to generate random values
  * Copyright (C) 2008-2012 Xavier Clerc
  *               2013      Gabriel Scherer
  *
- * This library evolved from experiments on the Generator module of Xavier Clerc's
+ * This library evolved from experiments on the Random_generator module of Xavier Clerc's
  * Kaputt library: http://kaputt.x9c.fr/
  *
  * Redistribution and use in source and binary forms, with or without

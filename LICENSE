@@ -1,4 +1,4 @@
-Generator -- a combinator library to generate random values
+Random_generator -- a combinator library to generate random values
 Copyright (C) 2008-2012 Xavier Clerc
               2013      Gabriel Scherer
 All rights reserved.

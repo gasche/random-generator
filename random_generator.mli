@@ -1,9 +1,9 @@
 (*
- * Generator -- a combinator library to generate random values
+ * Random_generator -- a combinator library to generate random values
  * Copyright (C) 2008-2012 Xavier Clerc
  *               2013      Gabriel Scherer
  *
- * This library evolved from experiments on the Generator module of Xavier Clerc's
+ * This library evolved from experiments on the Random_generator module of Xavier Clerc's
  * Kaputt library: http://kaputt.x9c.fr/
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,7 +28,7 @@
  * of this software, even if advised of the possibility of such damage.
  *)
 
-(** {1 Generator is a combinator library to generate random values. } *)
+(** {1 Random_generator is a combinator library to generate random values. } *)
 
 type random_state = Random.State.t
 (** Random.State.t is the type of the state of the standard library
