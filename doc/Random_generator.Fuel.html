@@ -1,0 +1,39 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=iso-8859-1" http-equiv="Content-Type">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="Start" href="index.html">
+<link rel="Up" href="Random_generator.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Random_generator" rel="Chapter" href="Random_generator.html"><title>Random_generator.Fuel</title>
+</head>
+<body>
+<div class="navbar">&nbsp;<a class="up" href="Random_generator.html" title="Random_generator">Up</a>
+&nbsp;</div>
+<h1>Module <a href="type_Random_generator.Fuel.html">Random_generator.Fuel</a></h1>
+
+<pre><span id="MODULEFuel"><span class="keyword">module</span> Fuel</span>: <code class="code">sig</code> <a href="Random_generator.Fuel.html">..</a> <code class="code">end</code></pre><div class="info module top">
+<div class="info-desc">
+<p>The <code class="code">Fuel</code> submodule provides the basic operations on fueled
+    generators.</p>
+</div>
+</div>
+<hr width="100%">
+
+<pre><span id="VALmap"><span class="keyword">val</span> map</span> : <code class="type">('a -> 'b) -> 'a <a href="Random_generator.html#TYPEfueled">Random_generator.fueled</a> -> 'b <a href="Random_generator.html#TYPEfueled">Random_generator.fueled</a></code></pre>
+<pre><span id="VALmap'"><span class="keyword">val</span> map'</span> : <code class="type">'a <a href="Random_generator.html#TYPEfueled">Random_generator.fueled</a> -> ('a -> 'b) -> 'b <a href="Random_generator.html#TYPEfueled">Random_generator.fueled</a></code></pre>
+<pre><span id="VALzero"><span class="keyword">val</span> zero</span> : <code class="type">'a -> 'a <a href="Random_generator.html#TYPEfueled">Random_generator.fueled</a></code></pre>
+<pre><span id="VALtick"><span class="keyword">val</span> tick</span> : <code class="type">'a <a href="Random_generator.html#TYPEfueled">Random_generator.fueled</a> -> 'a <a href="Random_generator.html#TYPEfueled">Random_generator.fueled</a></code></pre>
+<pre><span id="VALprod"><span class="keyword">val</span> prod</span> : <code class="type">(int -> (int * int) <a href="Random_generator.html#TYPEgen">Random_generator.gen</a>) -><br>       'a <a href="Random_generator.html#TYPEfueled">Random_generator.fueled</a> -><br>       'b <a href="Random_generator.html#TYPEfueled">Random_generator.fueled</a> -> ('a * 'b) <a href="Random_generator.html#TYPEfueled">Random_generator.fueled</a></code></pre>
+<pre><span id="VALchoose"><span class="keyword">val</span> choose</span> : <code class="type">'a <a href="Random_generator.html#TYPEfueled">Random_generator.fueled</a> list -> 'a <a href="Random_generator.html#TYPEfueled">Random_generator.fueled</a></code></pre><div class="info ">
+<div class="info-desc">
+<p>For a given amount of fuel, we will only choose among the
+      generators that can produce a term.</p>
+</div>
+</div>
+
+<pre><span id="VALfix"><span class="keyword">val</span> fix</span> : <code class="type">(('a -> 'b <a href="Random_generator.html#TYPEfueled">Random_generator.fueled</a>) -> 'a -> 'b <a href="Random_generator.html#TYPEfueled">Random_generator.fueled</a>) -><br>       'a -> 'b <a href="Random_generator.html#TYPEfueled">Random_generator.fueled</a></code></pre></body></html>
