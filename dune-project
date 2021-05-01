@@ -1,3 +1,2 @@
-(lang dune 1.5)
+(lang dune 2.0)
 (name random-generator)
-(using fmt 1.0)
