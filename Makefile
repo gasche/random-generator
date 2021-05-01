@@ -10,7 +10,7 @@ clean:
 
 .PHONY: docs
 doc:
-	ocamlbuild src/random_generator.docdir/index.html
+	dune build @doc
 
 .PHONY: install
 install:

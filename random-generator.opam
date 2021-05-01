@@ -1,5 +1,6 @@
 opam-version: "1"
 maintainer: ["gabriel.scherer@gmail.com" "simon.cruanes@inria.fr"]
+
 build: [
     [make "all" "install"]
 ]
