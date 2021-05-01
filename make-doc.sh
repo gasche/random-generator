@@ -13,6 +13,17 @@ rm -fR doc
 echo mv
 mv _build/random_generator.docdir doc
 
+# We renamed Generator into Random_generator, add a redirect page
+cat <<EOF > doc/Generator.html
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Refresh" content="0; url=Random_generator.html" />
+  </head>
+</html>
+EOF
+
+git add doc
 git commit -a -m "regenerate documentation at commit $HASH"
 
 echo checkout master
