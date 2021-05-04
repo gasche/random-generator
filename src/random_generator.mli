@@ -49,9 +49,11 @@ val run : 'a gen -> random_state -> 'a
 val make_char : char -> int -> char gen
 val lowercase : char gen
 val uppercase : char gen
+val digit : char gen
 
 (** base combinators names are adapted from Kaputt.Generator *)
 val unit : unit gen
+val prod : 'a gen -> 'b gen -> ('a * 'b) gen
 val make_int : int -> int -> int gen
 val make_nativeint : nativeint -> nativeint -> nativeint gen
 val make_int32 : int32 -> int32 -> int32 gen
@@ -118,7 +120,8 @@ val pure : 'a -> 'a gen
 
 (** {2 ['a gen] is a monad} *)
 
-val return : 'a -> 'a gen (** synonym of [pure] *)
+(** synonym of [pure] *)
+val return : 'a -> 'a gen
 val bind : ('a -> 'b gen) -> 'a gen -> 'b gen
 val bind' : 'a gen -> ('a -> 'b gen) -> 'b gen
 val join : 'a gen gen -> 'a gen

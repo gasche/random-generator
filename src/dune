@@ -1,0 +1,3 @@
+(library
+  (name random_generator)
+  (public_name random-generator))

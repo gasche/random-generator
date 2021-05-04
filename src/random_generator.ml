@@ -32,8 +32,6 @@ type random_state = Random.State.t
 type 'a gen = random_state -> 'a
 let run r = r
 
-let lift f x = fun r -> f r x
-
 (** 'a gen is a monad *)
 let map f gen = fun rand -> f (gen rand)
 let map' gen f = map f gen
@@ -58,7 +56,7 @@ let prod g1 g2 =
     (v1, v2)
 
 (** Value generators *)
-let unit r = ()
+let unit _ = ()
 let bool r = Random.State.bool r
 let bits r = Random.State.bits r
 let make_int a b r = a + Random.State.int r (b - a)
