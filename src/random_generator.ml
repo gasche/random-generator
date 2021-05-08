@@ -28,146 +28,228 @@
  * of this software, even if advised of the possibility of such damage.
  *)
 
-type random_state = Random.State.t
-type 'a gen = random_state -> 'a
-let run r = r
+module Make (Prob : Prob_monad.Sig) = struct
 
-(** 'a gen is a monad *)
-let map f gen = fun rand -> f (gen rand)
-let map' gen f = map f gen
+type 'a gen = 'a Prob.t
+let run = Prob.run
 
-let app f gen = fun rand -> f rand (gen rand)
-let app' gen f = app f gen
+let return = Prob.return
 
-let pure f = fun _ -> f
+let map = Prob.map
+let ( let+ ) m f = map f m
 
-let return x = fun _ -> x
-let bind f gen = fun rand -> f (gen rand) rand
-let bind' gen f = bind f gen
-let join gen = fun rand -> gen rand rand
+let pair = Prob.pair
+let ( and+ ) = pair
 
-let rec fix derec_gen param =
-  fun rand -> derec_gen (fix derec_gen) param rand
+let ( let* ) m f = Prob.join (Prob.map f m)
+let ( and* ) = Prob.pair
 
-let prod g1 g2 =
-  fun rand ->
-    let v1 = g1 rand in
-    let v2 = g2 rand in
-    (v1, v2)
+let join = Prob.join
+let bind f m = ( let* ) m f
 
-(** Value generators *)
-let unit _ = ()
-let bool r = Random.State.bool r
-let bits r = Random.State.bits r
-let make_int a b r = a + Random.State.int r (b - a)
-let make_float a b r = a +. Random.State.float r (b -. a)
-let make_int32 a b r = Int32.(add a @@ Random.State.int32 r @@ sub b a)
-let make_int64 a b r = Int64.(add a @@ Random.State.int64 r @@ sub b a)
-let make_nativeint a b r = Nativeint.(add a @@ Random.State.nativeint r @@ sub b a)
+let fix = Prob.fix
 
-let split_int n r =
-  let k = Random.State.int r (n + 1) in
+type bound = Incl | Excl
+
+let char start limit bound =
+  let size =
+    match bound with
+    | Incl -> int_of_char limit - int_of_char start + 1
+    | Excl -> int_of_char limit - int_of_char start
+  in
+  let+ i = Prob.int_exclusive size in
+  char_of_int (int_of_char start + i)
+
+let lowercase = char 'a' 'z' Incl
+let uppercase = char 'A' 'Z' Incl
+let digit = char '0' '9' Incl
+
+let unit = Prob.return ()
+let bool = Prob.bool
+
+let prod = Prob.pair
+
+let int start limit bound =
+  let size = match bound with
+    | Incl -> limit - start + 1
+    | Excl -> limit - start
+  in
+  let+ i = Prob.int_exclusive size in
+  start + i
+
+let rec traverse_list = function
+| [] -> return []
+| m::ms ->
+  let+ v = m
+  and+ vs = traverse_list ms
+  in v::vs
+
+let string size char =
+  let* n = size in
+  let+ chars = traverse_list @@ List.init n (fun _ -> char) in
+  String.concat "" (List.map (String.make 1) chars)
+
+let split_int n =
+  let+ k = Prob.int_exclusive (n + 1) in
   (k, n - k)
-
-let make_char start len r =
-  let n = Random.State.int r len in
-  char_of_int (n + int_of_char start)
-let lowercase = make_char 'a' 26
-let uppercase = make_char 'A' 26
-let digit = make_char '0' 10
-
-let string int char r =
-  let len = int r in
-  let res = String.init len (fun _ -> char r) in
-  res
-
-let shuffle li r =
-  let array = Array.of_list li in
-  for i = Array.length array-1 downto 1 do
-    let j = Random.State.int r (i+1) in
-    let tmp = array.(i) in
-    array.(i) <- array.(j);
-    array.(j) <- tmp;
-  done;
-  Array.to_list array
 
 type 'a nonempty_list = 'a list
 
-let select li r =
-  let len = List.length li in
-  List.nth li (Random.State.int r len)
+let select li =
+  let+ i = Prob.int_exclusive (List.length li) in
+  List.nth li i
 
-let choose li = join (select li)
+let choose li = Prob.join (select li)
 
+module PArray = struct
+  module M = Map.Make(Int)
+
+  type 'a t = int * 'a M.t
+
+  let init len f =
+    (* todo check if a balanced version could be faster *)
+    let rec loop f i m =
+      if i < 0 then m
+      else loop f (i - 1) (M.add i (f i) m)
+    in
+    (len, loop f (len - 1) M.empty)
+
+  let length (len, _m) = len
+
+  let get i (len, m) =
+    if i < 0 || i >= len then invalid_arg "PArray.get";
+    M.find i m
+
+  let set i v (len, m) =
+    if i < 0 || i >= len then invalid_arg "PArray.set";
+    (len, M.add i v m)
+
+  let to_list (_len, m) =
+    M.bindings m
+
+  let of_list li =
+    let m = M.of_seq (List.to_seq li) in
+    let rec check m i =
+      if i < 0 then ()
+      else if not (M.mem i m) then invalid_arg "PArray.of_seq"
+      else check m (i - 1)
+    in
+    let len = List.length li in
+    check m (len - 1);
+    (len, m)
+
+  let traverse ((_len, m) : 'a gen t) : 'a t gen  =
+    let rec loop = function
+      | [] -> return []
+      | (i, gen) :: gens ->
+        let+ v = gen
+        and+ vs = loop gens
+        in (i, v) :: vs
+    in
+    let+ li = loop (M.bindings m) in
+    of_list li
+
+  let shuffle (len, m) =
+    let swap i j m =
+      if i = j then m
+      else
+        m
+        |> M.add i (M.find j m)
+        |> M.add j (M.find i m)
+    in
+    let rec loop i m =
+      if i <= 1 then Prob.return m
+      else
+        let* k = Prob.int_exclusive i in
+        loop (i - 1) (swap (i - 1) k m)
+    in
+    let+ m = loop len m in
+    (len, m)
+end
+
+let shuffle_list li =
+  let+ arr =
+    li
+    |> List.mapi (fun i v -> (i, v))
+    |> PArray.of_list
+    |> PArray.shuffle
+  in
+  PArray.to_list arr
+  |> List.map snd
 
 (** backtracking operator *)
 type 'a backtrack_gen = 'a option gen
 
-let succeed gen = map (fun x -> Some x) gen
+let succeed gen =
+  let+ x = gen in Some x
 
-let guard p gen r =
-  match gen r with
-    | None -> None
-    | Some x ->
-      if p x then Some x else None
+let guard p gen =
+  let+ o = gen in
+  match o with
+  | None -> None
+  | Some x as res->
+    if p x then res else None
 
-let cond p gen r =
+let cond p gen =
   (* it is important not to call (gen r) if 'p' is false, as this
      function may be used to guard cases where the random generator
      would fail on its input (e.g. a negative number passed to
      Random.State.int) *)
-  if p then gen r else None
+  if p then gen else Prob.return None
 
-let rec backtrack gen r = match gen r with
-  | None -> backtrack gen r
-  | Some result -> result
 
+let rec backtrack gen =
+  let* o = gen in
+  match o with
+  | None -> backtrack gen
+  | Some v -> return v
 
 (** fueled generators *)
-type 'a fueled = (int -> 'a option) gen
+module Fueled = struct
+  type 'a t = int -> 'a backtrack_gen
 
-module Fuel = struct
-  let map f gen random fuel =
-    match gen random fuel with
-      | None -> None
-      | Some x -> Some (f x)
-  let map' f gen = map gen f
+  let map f gen =
+    fun fuel ->
+      Prob.map (Option.map f) (gen fuel)
 
-  let zero v _random = function
-    | 0 -> Some v
-    | _ -> None
+  let zero v = function
+    | 0 -> return (Some v)
+    | _ -> return None
 
-  let tick gen random fuel =
-    let fuel = fuel - 1 in
-    if fuel < 0 then None
-    else gen random fuel
+  let tick gen =
+    fun fuel ->
+      let fuel = fuel - 1 in
+      if fuel < 0 then return None
+      else gen fuel
 
-  let prod split gen1 gen2 = fun random fuel ->
-    let fuel1, fuel2 = split fuel random in
-    match gen1 random fuel1, gen2 random fuel2 with
+  let prod split gen1 gen2 =
+    fun fuel ->
+      let* (fuel1, fuel2) = split fuel in
+      let+ o1 = gen1 fuel1
+      and+ o2 = gen2 fuel2 in
+      match o1, o2 with
       | None, _ | _, None -> None
       | Some v1, Some v2 -> Some (v1, v2)
 
-  let choose li random fuel =
-    let li = shuffle li random in
-    let rec first = function
-      | [] -> None
-      | x::xs ->
-         begin match x random fuel with
-                 | None -> first xs
-                 | Some _ as result -> result
-         end
-    in first li
+  let choose li =
+    fun fuel ->
+      let* choices = traverse_list (List.map (fun gen -> gen fuel) li) in
+      match List.filter_map Fun.id choices with
+      | [] -> return None
+      | _::_ as choices -> let+ v = select choices in Some v
 
   let rec fix derec_gen param =
-    fun random fuel -> derec_gen (fix derec_gen) param random fuel
+    fun fuel -> derec_gen (fix derec_gen) param fuel
+
+  let (let+) gen f = map f gen
+  let (and+) gen1 gen2 = prod split_int gen1 gen2
 end
 
-let nullary v = Fuel.zero v
-let unary gen f = Fuel.(map f (tick gen))
+let nullary v = Fueled.zero v
+let unary gen f = Fueled.(map f (tick gen))
 let binary gen1 gen2 merge =
-  let open Fuel in
-  map'
-    (tick (prod split_int gen1 gen2))
-    (fun (v1, v2) -> merge v1 v2)
-
+  let open Fueled in
+  tick @@
+  let+ v1 = gen1 and+ v2 = gen2 in
+  merge v1 v2
+end

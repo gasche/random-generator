@@ -30,44 +30,38 @@
 
 (** {1 Random_generator is a combinator library to generate random values. } *)
 
-type random_state = Random.State.t
-(** Random.State.t is the type of the state of the standard library
-    Random module.
-
-    Use [Random.get_state ()] to get the current (global) state of the
-    Random module, or [Random.State.make : int array -> Random.State.tt]
-    or [Random.State.make_self_init () : unit -> Random.State.t] to generate
-    fresh, independent state.
-*)
-
-type 'a gen = random_state -> 'a
-
-val run : 'a gen -> random_state -> 'a
-
+module Make (Prob : Prob_monad.Sig) : sig
 (** {2 Value generators and combinators} *)
 
-val make_char : char -> int -> char gen
+type 'a gen = 'a Prob.t
+val run : 'a gen -> 'a Prob.run
+
+type bound = Incl | Excl
+
+val char : char -> char -> bound -> char gen
 val lowercase : char gen
 val uppercase : char gen
 val digit : char gen
 
-(** base combinators names are adapted from Kaputt.Generator *)
 val unit : unit gen
-val prod : 'a gen -> 'b gen -> ('a * 'b) gen
-val make_int : int -> int -> int gen
-val make_nativeint : nativeint -> nativeint -> nativeint gen
-val make_int32 : int32 -> int32 -> int32 gen
-val make_int64 : int64 -> int64 -> int64 gen
-val make_float : float -> float -> float gen
-val string : int gen -> char gen -> string gen
+
 val bool : bool gen
-val bits : int gen
+
+val prod : 'a gen -> 'b gen -> ('a * 'b) gen
+
+val int : int -> int -> bound -> int gen
+
+val string : int gen -> char gen -> string gen
 
 val split_int : int -> (int * int) gen
 (** [split_int n] returns two integers [(i,k)] each in the interval
     [[0;n]] such that [i + k = n] *)
 
 (** list combinators *)
+
+val traverse_list : 'a gen list -> 'a list gen
+val shuffle_list : 'a list -> 'a list gen
+(** returns a (uniform) permutation of the list *)
 
 type 'a nonempty_list = 'a list
 (** list combinators being of the form "pick an element such that",
@@ -79,52 +73,56 @@ type 'a nonempty_list = 'a list
 val select : 'a nonempty_list -> 'a gen
 val choose : 'a gen nonempty_list -> 'a gen
 
-val shuffle : 'a list -> 'a list gen
-(** returns a (uniform) permutation of the list *)
+(* pure arrays *)
+module PArray : sig
+  type 'a t
+  val init : int -> (int -> 'a) -> 'a t
+  val length : 'a t -> int
+  val get : int -> 'a t -> 'a
+  val set : int -> 'a -> 'a t -> 'a t
+  val to_list : 'a t -> (int * 'a) list
+  val of_list : (int * 'a) list -> 'a t
+
+  val traverse : 'a gen t -> 'a t gen
+  val shuffle : 'a t -> 'a t gen
+end
 
 (** {2 ['a gen] is a functor} *)
 
 val map : ('a -> 'b) -> 'a gen -> 'b gen
-val map' : 'a gen -> ('a -> 'b) -> 'b gen
+val (let+) : 'a gen -> ('a -> 'b) -> 'b gen
 
 (** The functor's [map] is very useful to post-process the result of
     a random generator.
 {[
     let hexa_digit =
-        map' (make_int 0 16) (fun i -> "0123456789ABCDEF".[i])
+       let+ i = make_int 0 16 in
+       "0123456789ABCDEF".[i]
 ]}
-
-    As an API convention, I use quotes to signal a version of the
-    combinator with the arguments swapped so that the generator value
-    appears first. This can be useful when you think of your code in
-    terms of "first generate a [foo], and then ..." rather than "apply
-    this simple transformation on ...".
 *)
 
 (** {2 ['a gen] is applicative} *)
 
-val app : ('a -> 'b) gen -> 'a gen -> 'b gen
-val app' : 'a gen -> ('a -> 'b) gen -> 'b gen
+val return : 'a -> 'a gen
 
-val pure : 'a -> 'a gen
+val pair : 'a gen -> 'b gen -> ('a * 'b) gen
+val ( and+ ) : 'a gen -> 'b gen -> ('a * 'b) gen
 
 (** Applicative combinators are useful to lift a function applied to
     pure arguments into a function applied to generators. You would
     naturally write [Array.make n v] to initialize an array. If the
     length and the initial values are instead randomly generated
-    ([n : int gen] and [v : 'a gen]), then you can mechanically write
-    [app (app (pure Array.make) f) n]. In practice you should define
-    your preferred infix operators for [app] (I use [($$)])
-    to write [pure Array.make $$ f $$ n].
+    ([foo : int gen] and [bar : 'a gen]), then you can mechanically write
+    [let+ n = foo and+ v = bar in Array.make f n v].
 *)
 
 (** {2 ['a gen] is a monad} *)
 
 (** synonym of [pure] *)
-val return : 'a -> 'a gen
-val bind : ('a -> 'b gen) -> 'a gen -> 'b gen
-val bind' : 'a gen -> ('a -> 'b gen) -> 'b gen
 val join : 'a gen gen -> 'a gen
+val bind : ('a -> 'b gen) -> 'a gen -> 'b gen
+val ( let* ) : 'a gen -> ('a -> 'b gen) -> 'b gen
+val ( and* ) : 'a gen -> 'b gen -> ('a * 'b) gen
 
 (** Monad combinators are useful when you need an intermediate random
     result to return not a random value ([map] is enough for this) but
@@ -140,16 +138,16 @@ val join : 'a gen gen -> 'a gen
     based on it.
 {[
     let my_gen =
-    bind' bool (function
-    | true -> make_int 0 10
-    | false -> make_int 0 max_int)
+      let* small = bool in
+      if small then int 0 10
+      else int 0 10_000
 ]}
 
     Remark: the kind of logic used in this example
     (picking a generator among a finite set) is encapsulated in the
     {!choose} function.
 {[
-    let my_gen = choose [make_int 0 10; make_int 0 max_int]
+    let my_gen = choose [int 0 10; int 0 10_000]
 ]}
 *)
 
@@ -160,11 +158,11 @@ val fix : (('a -> 'b gen) -> ('a -> 'b gen)) -> 'a -> 'b gen
 
 (** Parametrized fixpoint is more expressive than non-parametrized
     fixpoint [('b gen -> 'b gen) -> 'b gen], as it encodes recursive
-    calls with varying arguments. Consider a factorial function defined
-    by the following pseudo-code:
+    calls with varying arguments. Consider a variant of the factorial
+    function defined by the following pseudo-code:
 {[
     let rec fact = function
-    | 0 -> 1 or -1 (at random)
+    | 0 -> 1 or -1 (*at random*)
     | n -> n * fact (n - 1)
 ]}
     Encoding it as a fixpoint is direct, the trick is to name the
@@ -173,7 +171,7 @@ val fix : (('a -> 'b gen) -> ('a -> 'b gen)) -> 'a -> 'b gen
 {[
     let fact = fix (fun fact -> function
       | 0 -> select [1; -1]
-      | n -> map (( * ) n) (fact (n - 1)))
+      | n -> let+ v = fact (n - 1) in n * v
 ]}
 *)
 
@@ -203,8 +201,6 @@ val backtrack : 'a backtrack_gen -> 'a gen
 
 
 (** {2 fueled generators} *)
-
-type 'a fueled = (int -> 'a option) gen
 
 (** Fueled generators are domain-specific generators aimed at
     producing "good-looking" values that have a size and are built
@@ -248,30 +244,31 @@ type 'a fueled = (int -> 'a option) gen
     one to account for the node's cost itself), and then force each
     branch to build a term {i exactly of this size}.
 
-    A {i fueled generator} ['a fueled] is therefore a generator that
-    randomly produces not an ['a], but a [int -> 'a option] value:
-    a function that, given some amount of fuel, will produce an ['a]
-    consuming exactly this amount of fuel, or fail (if there is no
-    term of the requested size) and return [None].
+    A {i fueled generator} ['a fueled] is a function that, given
+    some amount of fuel, will randomly generate an ['a option]
+    by consuming exactly this amount of fuel -- if there is no
+    term of the requested size, it returns [None].
 *)
+module Fueled : sig
+  type 'a t = int -> 'a backtrack_gen
 
-module Fuel : sig
-  val map : ('a -> 'b) -> 'a fueled -> 'b fueled
-  val map' : 'a fueled -> ('a -> 'b) -> 'b fueled
+  val map : ('a -> 'b) -> 'a t -> 'b t
+  val (let+) : 'a t -> ('a -> 'b) -> 'b t
+  val (and+) : 'a t -> 'b t -> ('a * 'b) t
 
-  val zero : 'a -> 'a fueled
-  val tick : 'a fueled -> 'a fueled
+  val zero : 'a -> 'a t
+  val tick : 'a t -> 'a t
   val prod : (int -> (int * int) gen) ->
-    'a fueled -> 'b fueled -> ('a * 'b) fueled
+    'a t -> 'b t -> ('a * 'b) t
 
-  val choose : 'a fueled list -> 'a fueled
+  val choose : 'a t list -> 'a t
   (** For a given amount of fuel, we will only choose among the
       generators that can produce a term. *)
 
-  val fix : (('a -> 'b fueled) -> ('a -> 'b fueled)) -> ('a -> 'b fueled)
+  val fix : (('a -> 'b t) -> ('a -> 'b t)) -> ('a -> 'b t)
 end
 (**
-    The [Fuel] submodule provides the basic operations on fueled
+    The [Fueled] submodule provides the basic operations on fueled
     generators.
 *)
 
@@ -285,7 +282,7 @@ end
 
     We also provide some convenience functions outside
     this module, {!nullary}, {!unary} and {!binary}, that have
-    a pre-build tick+split logic that will suit most practical use
+    a pre-built tick+split logic that will suit most practical use
     cases for generating inductive types with constructors having
     zero, one or two recursive occurences.
 
@@ -295,16 +292,16 @@ end
 
     Here is a fueled generator for [unit tree]:
 {[
-    let tree : unit tree fueled =
-      Fuel.fix (fun tree () ->
-        Fuel.choose [
+    let tree : unit tree Fueled.t =
+      Fueled.fix (fun tree () ->
+        Fueled.choose [
           nullary (Leaf ());
           binary (tree ()) (tree ()) _Node;
         ]) ()
 ]}
 
     Now consider producing a [bool tree], with each leaf boolean
-    picked at random. An important thing to understand is that Fuel's
+    picked at random. An important thing to understand is that Fueled's
     duty and scope is to pick a random {i shape} for your data
     structure, not help you select the values of the non-recursive
     part of the program (randomly or not). The right way to do that is
@@ -313,27 +310,28 @@ end
     the fuel engine); so we have one level of randomness for the
     shape, one for the leaf values.
 {[
-    let random_tree : bool tree gen fueled =
-      let ($$) = app in
-      Fuel.fix (fun random_tree () ->
-        Fuel.choose [
-          nullary (pure _Leaf $$ bool);
+    let random_tree : bool tree gen Fueled.t =
+      Fueled.fix (fun random_tree () ->
+        Fueled.choose [
+          nullary (let+ b = bool in Leaf b);
           binary (random_tree ()) (random_tree ())
-            (fun t1 t2 -> pure _Node $$ t1 $$ t2);
+            (fun t1 t2 -> let+ t1 = t1 and+ t2 = t2 in Node(t1, t2));
         ]) ()
 
     let tree (size : int gen) : bool tree gen =
-      app random_tree size |> backtrack |> join
+      let* n = size in
+      random_tree n |> backtrack |> join
 ]}
 *)
 
 (** {3 convenience functions for fueled generators} *)
 
-val nullary : 'a -> 'a fueled
+val nullary : 'a -> 'a Fueled.t
 (** zero *)
 
-val unary : 'a fueled -> ('a -> 'b) -> 'b fueled
+val unary : 'a Fueled.t -> ('a -> 'b) -> 'b Fueled.t
 (** will do a tick *)
 
-val binary : 'a fueled -> 'b fueled -> ('a -> 'b -> 'c) -> 'c fueled
+val binary : 'a Fueled.t -> 'b Fueled.t -> ('a -> 'b -> 'c) -> 'c Fueled.t
 (** will do a tick and use split_int *)
+end
