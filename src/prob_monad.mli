@@ -26,4 +26,4 @@ module Random : Sig with type 'a t = Random.State.t -> 'a
                      and type 'a run = 'a
 
 module Distr : Sig with type 'a t = (Q.t * 'a) Seq.t
-                    and type 'a run = ((int*int) * 'a) list
+                    and type 'a run = cmp:('a -> 'a -> int) ->((int*int) * 'a) list

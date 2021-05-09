@@ -49,15 +49,18 @@ end
 
 module Distr
   : Sig with type 'a t = (Q.t * 'a) Seq.t
-         and type 'a run = ((int*int) * 'a) list
+         and type 'a run = cmp:('a -> 'a -> int) -> ((int*int) * 'a) list
 = struct
   type 'a t = (Q.t * 'a) Seq.t
-  type 'a run = ((int*int) * 'a) list
+  type 'a run = cmp:('a -> 'a -> int) -> ((int*int) * 'a) list
 
-  let run m =
-    m
-    |> Seq.map (fun (w,v) -> (Q.view w, v))
-    |> List.of_seq
+  let run (type a) m ~cmp =
+    let module M = Map.Make(struct type t = a let compare = cmp end) in
+    let add map (w, v) =
+      M.update v (function None -> Some w | Some w' -> Some (Q.add w w')) map
+    in
+    let map = Seq.fold_left add M.empty m in
+    M.fold (fun v w acc -> (Q.view w,v) :: acc) map [] |> List.rev
 
   let map f m = Seq.map (fun (w, v) -> (w, f v)) m
 
