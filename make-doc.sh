@@ -20,7 +20,7 @@ cat <<EOF > doc/Generator.html
 <!DOCTYPE html>
 <html>
   <head>
-    <meta http-equiv="Refresh" content="0; url=random-generator/Random_generator/index.html" />
+    <meta http-equiv="Refresh" content="0; url=random-generator/Random_generator/Generator/index.html" />
   </head>
 </html>
 EOF
