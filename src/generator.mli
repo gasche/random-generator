@@ -37,7 +37,8 @@ module Make (Prob : Prob_monad.Sig) : sig
     type 'a t = 'a Prob.t
     val run : 'a t -> 'a Prob.run
 
-    type bound = Incl | Excl
+    type bound = Excl | Incl
+    val range_size : int -> int -> bound -> int
 
     val char : char -> char -> bound -> char t
     val lowercase : char t
@@ -54,9 +55,42 @@ module Make (Prob : Prob_monad.Sig) : sig
 
     val string : int t -> char t -> string t
 
-    val split_int : int -> (int * int) t
-    (** [split_int n] returns two integers [(i,k)] each in the interval
-        [[0;n]] such that [i + k = n] *)
+    (** Natural number combinators *)
+
+    module Nat : sig
+      val subset : size:int -> int -> int -> bound -> int list t
+      (** [subset ~size:k start limit bound] generates a sorted list
+          of length [k] of distinct integers in the interval from
+          [start] (included) to [limit] (included or excluded,
+          depending on [bound]).
+
+          The complexity is O(k log k), drawing [k] random integers.
+      *)
+
+      val split2 : int -> (int * int) t
+      (** [split2 n] returns two integers [(n1,n2)] each in the interval
+          [[0;n]] such that [n1 + n2 = n] *)
+
+      val split : size:int -> int -> int list t
+      (** [split ~size:k n] generates a [k]-sized list [n1,n2,..nk]
+          of natural numbers in the interval [[0;n]]
+          such that [n1 + n2 + ... + nk = n].
+
+          This is useful to split sizes to combine fueled generators.
+
+          Complexity O(k log k).
+      *)
+
+      val pos_split : size:int -> int -> int list t
+      (** [pos_split ~size:k n] generates a [k]-sized list [n1,n2,..nk]
+          of natural numbers in the interval [[1;n]]
+          such that [n1 + n2 + ... + nk = n].
+
+          @raise Invalid_argument unless [n >= k].
+
+          Complexity O(k log k).
+      *)
+    end
 
     (** list combinators *)
 
@@ -74,6 +108,14 @@ module Make (Prob : Prob_monad.Sig) : sig
 
       val select : 'a nonempty_list -> 'a t
       val choose : 'a t nonempty_list -> 'a t
+
+      val subset : int -> 'a list -> 'a list t
+      (** [subset k li] generates a sub-list of k elements
+          at distinct positions in the input list [li],
+          in the same order.
+
+          Complexity O(k log k), drawing [k] random integers.
+      *)
     end
 
     module Ar : sig
@@ -82,6 +124,8 @@ module Make (Prob : Prob_monad.Sig) : sig
 
       val select : 'a PArray.t -> 'a t
       val choose : 'a t PArray.t -> 'a t
+
+      val subset : int -> 'a PArray.t -> 'a PArray.t t
     end
 
     (** {2 ['a Gen.t] is a functor} *)

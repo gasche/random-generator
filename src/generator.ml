@@ -50,14 +50,16 @@ module Make (Prob : Prob_monad.Sig) = struct
 
     let fix = Prob.fix
 
-    type bound = Incl | Excl
+    type bound = Excl | Incl
+    let of_bound = function
+      | Excl -> 0
+      | Incl -> 1
+
+    let range_size start limit bound =
+      limit - start + of_bound bound
 
     let char start limit bound =
-      let size =
-        match bound with
-        | Incl -> int_of_char limit - int_of_char start + 1
-        | Excl -> int_of_char limit - int_of_char start
-      in
+      let size = range_size (int_of_char start) (int_of_char limit) bound in
       let+ i = Prob.int_exclusive size in
       char_of_int (int_of_char start + i)
 
@@ -71,16 +73,53 @@ module Make (Prob : Prob_monad.Sig) = struct
     let prod = Prob.pair
 
     let int start limit bound =
-      let size = match bound with
-        | Incl -> limit - start + 1
-        | Excl -> limit - start
-      in
+      let size = range_size start limit bound in
       let+ i = Prob.int_exclusive size in
       start + i
 
-    let split_int n =
-      let+ k = Prob.int_exclusive (n + 1) in
-      (k, n - k)
+    module Nat = struct
+      let split2 n =
+        let+ k = Prob.int_exclusive (n + 1) in
+        (k, n - k)
+
+      let subset ~size start limit bound =
+        let range = range_size start limit bound in
+        if not (0 <= size && size <= range) then invalid_arg "Gen.Nat.subset";
+        (* The algorithm below is attributed to Floyd, see for example
+           https://eyalsch.wordpress.com/2010/04/01/random-sample/
+           https://math.stackexchange.com/questions/178690
+        *)
+        let module ISet = Set.Make(Int) in
+        let stop = limit + of_bound bound in
+        let rec fill set i =
+          if i = stop then return set
+          else
+            let* pos = int start i Incl in
+            let choice = if ISet.mem pos set then i else pos in
+            fill (ISet.add choice set) (i + 1)
+        in
+        let+ set = fill ISet.empty (stop - size) in
+        ISet.elements set
+
+      let pos_split ~size:k n =
+        (* To split n into n{0}+n{1}+..+n{k-1}, we draw distinct "boundaries"
+           b{-1}..b{k-1}, with b{-1}=0 and b{k-1} = n
+           and the k-1 intermediate boundaries b{0}..b{k-2}
+           chosen randomly distinct in [1;n-1].
+
+           Then each n{i} is defined as b{i}-b{i-1}. *)
+        let+ b = subset ~size:(k-1) 1 (n - 1) Incl in
+        let b = Array.of_list b in
+        List.init k (fun i ->
+          if i = 0 then b.(0)
+          else if i = k-1 then n - b.(i-1)
+          else b.(i) - b.(i-1)
+        )
+
+      let split ~size:k n =
+        let+ ns = pos_split ~size:k (n+k) in
+        List.map (fun v -> v - 1) ns
+    end
 
     module Ar = struct
       let traverse arr =
@@ -116,6 +155,11 @@ module Make (Prob : Prob_monad.Sig) = struct
             loop (i - 1) (swap (i - 1) k m)
         in
         loop (PArray.length arr) arr
+
+      let subset size arr =
+        let+ indices = Nat.subset ~size 0 (PArray.length arr) Excl in
+        List.map (fun i -> (i, PArray.get i arr)) indices
+        |> PArray.of_list
     end
 
     module Li = struct
@@ -144,6 +188,11 @@ module Make (Prob : Prob_monad.Sig) = struct
         in
         PArray.to_list arr
         |> List.map snd
+
+      let subset size li =
+        let+ indices = Nat.subset ~size 0 (List.length li) Excl in
+        let arr = Array.of_list li in
+        List.map (fun i -> arr.(i)) indices
     end
 
     let string size char =
@@ -203,9 +252,9 @@ module Make (Prob : Prob_monad.Sig) = struct
         if fuel < 0 then return None
         else gen fuel
 
-    let prod split gen1 gen2 =
+    let prod split2 gen1 gen2 =
       fun fuel ->
-        let* (fuel1, fuel2) = split fuel in
+        let* (fuel1, fuel2) = split2 fuel in
         let+ o1 = gen1 fuel1
         and+ o2 = gen2 fuel2 in
         match o1, o2 with
@@ -228,7 +277,7 @@ module Make (Prob : Prob_monad.Sig) = struct
     let unary gen f = map f (tick gen)
     let binary gen1 gen2 merge =
       tick @@
-      let+ (v1, v2) = prod Gen.split_int gen1 gen2 in
+      let+ (v1, v2) = prod Gen.Nat.split2 gen1 gen2 in
       merge v1 v2
   end
 
