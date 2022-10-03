@@ -295,7 +295,7 @@ module Make (Prob : Prob_monad.Sig) : sig
     type 'a t = int -> 'a BacktrackGen.t
 
     val map : ('a -> 'b) -> 'a t -> 'b t
-    val (let+) : 'a t -> ('a -> 'b) -> 'b t
+    val ( let+ ) : 'a t -> ('a -> 'b) -> 'b t
 
     val zero : 'a -> 'a t
     val tick : 'a t -> 'a t
@@ -307,6 +307,9 @@ module Make (Prob : Prob_monad.Sig) : sig
         generators that can produce a term. *)
 
     val fix : (('a -> 'b t) -> ('a -> 'b t)) -> ('a -> 'b t)
+
+    val join_in_gen: 'a t Gen.t -> 'a t
+    val join_in_backtrack_gen : 'a t BacktrackGen.t -> 'a t
 
     (** {3 convenience functions for fueled generators}
 

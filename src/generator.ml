@@ -236,6 +236,16 @@ module Make (Prob : Prob_monad.Sig) = struct
   module FuelGen = struct
     type 'a t = int -> 'a BacktrackGen.t
 
+    let join_in_gen (gen : 'a t Gen.t) : 'a t =
+      fun fuel -> Gen.(let* gen in gen fuel)
+
+    let join_in_backtrack_gen (gen : 'a t BacktrackGen.t) : 'a t =
+      fun fuel ->
+        Gen.(let* gen in
+             match gen with
+             | None -> return None
+             | Some gen -> gen fuel)
+
     open Gen
 
     let map f gen =
