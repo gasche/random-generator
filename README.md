@@ -18,10 +18,10 @@ be easy to read. You have been warned.)
 
 The library currently provides three different pieces:
 
-- a type `'a gen` for dead simple random generation
-- a type `'a backtrack_gen` for generators that can fail:
+- a type `'a Gen.t` for dead simple random generation
+- a type `'a BacktrackGen.t` for generators that can fail:
   "generate a value such that this (possibly empty) condition is verified"
-- a type `'a fueled` for generation of values with an inductive
+- a type `'a FuelGen.t` for generation of values with an inductive
   (tree-like) structure that looks nice to the human eye; see [the
   documentation](http://gasche.github.io/random-generator/doc/Random_generator.html#2_fueledgenerators) for more information on this.
 
